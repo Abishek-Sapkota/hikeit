@@ -17,7 +17,6 @@ from .authenticate import authenticateUser
 #     return Response(routes)
 
 
-
 class userInformation(APIView):  # --> classbased api view
     def get(self, request):  # --> this just list all the users
         userinfo = UserInfo.objects.all()
@@ -36,7 +35,9 @@ class userInformation(APIView):  # --> classbased api view
     def post(self, request):  # --> create new user
         try:
             data = request.data  # -> extract the data part from the post request
+            print(data)
             serializer = UserInfoSerializer(data=data, many=False)
+            print(serializer)
             if serializer.is_valid():
                 serializer.save()
                 return Response(
@@ -51,13 +52,11 @@ class userInformation(APIView):  # --> classbased api view
             print(e)
 
 
-
 # @api_view(['GET'])
 # def getUserInfo(request):
 # 	userinfo = UserInfo.objects.all()
 # 	serializer = UserInfoSerializer(userinfo, many=True) #-> serializes the userinfo for frontend
 # 	return Response(serializer.data)
-
 
 
 @api_view(["GET"])
@@ -84,18 +83,20 @@ def getOneUserInfo(request, ph_number):
         )
 
 
+@api_view(['POST'])
+def createUser(request):
+    data = request.data #-> extract the data part from the post request
 
-# @api_view(['POST'])
-# def createUser(request):
-# data = request.data #-> extract the data part from the post request
-
-# new_user = UserInfo.objects.create(
-# 	first_name=data['first_name'],
-# 	last_name=data['last_name'],
-# 	ph_number=data['ph_number']
-# )
-# serializer = UserInfoSerializer(new_user, many=False)
-# return Response(serializer.data)
+    new_user = UserInfo.objects.create(
+        first_name=data['firstName'],
+        last_name=data['lastName'],
+        ph_number=data['phone'],
+        isRider=data['isRider'],
+        current_address=data['currentAddress'],
+        DOB = data['dateOfBirth']
+    )
+    serializer = UserInfoSerializer(new_user, many=False)
+    return Response(serializer.data)
 
 
 @api_view(["PUT"])  # Put request is to update data
@@ -127,7 +128,6 @@ def updateUser(self, request, ph_number):  # ---> update the user information
         )
 
 
-
 @api_view(["DELETE"])
 def deleteUser(request, ph_number):  # --> delete the existing user
     user = UserInfo.objects.get(ph_number=ph_number)
@@ -135,39 +135,7 @@ def deleteUser(request, ph_number):  # --> delete the existing user
     return Response({"status": 200, "message": "User deleted sucessfully", "data": {}})
 
 
-class authenticateUser(APIView):
-    def post(self, request):
-        try:
-            data = request.data
-            serializer = loginSerializer(data=data)
 
-            if serializer.is_valid():
-                ph_number = serializer.data["ph_number"]
-
-                try:
-                    user = UserInfo.objects.get(ph_number=ph_number)
-                    serializer = UserInfoSerializer(user, many=False)
-                # user = authenticate(username=ph_number)
-
-                except:
-                    return Response(
-                        {"status": 400, "message": "Invalid phone number", "payload": {}}
-                    )
-                refresh = RefreshToken.for_user(user)
-
-                return Response(
-                    {
-                        "status": 200,
-                        "refresh": str(refresh),
-                        "access": str(refresh.access_token),
-                        "payload": serializer.data,
-                    }
-                )
-
-            return Response({"status": 400, "message": "Something went wrong"})
-
-        except Exception as e:
-            print(e)
 
 
 class storeRideInfo(APIView):
@@ -201,7 +169,7 @@ def getLoci(request, pk):
     try:
         data = request.data
         queryset = rideInfo.objects.filter(user_id=pk)
-        serializer = rideInfoSerializer(id=pk)
+        serializer = rideInfoSerializer(user_id=pk)
         print(serializer)
         if serializer.is_valid():
             ph_number = serializer.data["ph_number"]
@@ -227,7 +195,43 @@ def getLoci(request, pk):
             }
         )
 
-# class shareRide(APIView):
-#     class get(self, request):
-#         try:
-#             data = request.data
+
+class authenticateUser(APIView):
+    def post(self, request):
+        try:
+            data = request.data 
+            print("test1")
+            serializer = loginSerializer(data = data)
+            if serializer.is_valid():
+                ph_number = serializer.data['ph_number']
+
+                # try:
+                user = UserInfo.objects.get(ph_number=ph_number)
+                #user = UserInfo.objects.filter(ph_number=ph_number)
+                
+                serializer = UserInfoSerializer(user, many=False)
+                # refresh = RefreshToken.for_user(user)
+                #print(str(refresh))
+                #print(str(refresh.access_token))
+                # return {
+                #     'refresh': str(refresh),
+                #     'access': str(refresh.access_token),
+                #     }
+                    
+                
+            
+                # except:
+                #     return Response({
+                #         "status":400,
+                #         "message":"Wrong phone number",
+                #         "error": serializer.errors
+                #     })
+                
+                return Response(
+                    {
+                        "status":200,
+                        "payload":serializer.data,
+                     }
+                )
+        except Exception as e:
+            print(e)

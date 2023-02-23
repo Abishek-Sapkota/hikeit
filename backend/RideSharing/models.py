@@ -4,20 +4,21 @@ from django.db import models
 
 
 class UserInfo(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    first_name = models.CharField(max_length=15)
-    last_name = models.CharField(max_length=20)
-    email = models.EmailField(unique=True)
-    ph_number = models.CharField(max_length=14, unique=True)
-    dob = models.DateField()
-    user_profile = models.ImageField(upload_to="profilesPictures")
-    isRider = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now=True)
+	user_id = models.AutoField(primary_key=True)
+	first_name = models.CharField(max_length=15)
+	last_name = models.CharField(max_length=20)
+	email = models.EmailField(unique=True, blank = True)
+	ph_number = models.CharField(max_length=14, unique=True)
+	current_address = models.CharField(max_length=50)
+	dob = models.DateField()
+	user_profile = models.ImageField(upload_to="profilesPictures")
+	isRider = models.BooleanField(default=False, blank=True)
+	created_at = models.DateTimeField(auto_now=True)
 
-    USERNAME_FIELD = "ph_number"
+	USERNAME_FIELD = "ph_number"
 
-    def __str__(self):
-        return f"Name: {self.first_name} {self.last_name} Phone Number:{self.ph_number} and created at {self.created_at}"
+	def __str__(self):
+		return f"Name: {self.first_name} {self.last_name} Phone Number:{self.ph_number} and created at {self.created_at}"
 
 
 class rideInfo(models.Model):
@@ -59,7 +60,7 @@ class vehicleInformation(models.Model):
 	BIKE = "A"
 	VEHICLE_TYPE = [(BIKE, "Bike"), (CAR, "car")]
 
-	userId = models.ForeignKey(UserInfo, on_delete=models.CASCADE)
+	user_id = models.ForeignKey(UserInfo, on_delete=models.CASCADE)
 	vehicle_type = models.CharField(max_length=1, choices=VEHICLE_TYPE)
 	vehicle_number = models.CharField(unique=True, max_length=21)
 	vehicle_photo = models.ImageField(upload_to="vehiclePictures")

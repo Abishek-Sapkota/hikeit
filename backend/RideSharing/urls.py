@@ -3,7 +3,7 @@ from . import views
 
 
 urlpatterns = [
-	#path('createuser/', views.createUser,name='Create_user'),
+	path('createuser/', views.createUser,name='Create_user'),
 	#path('', views.index, name='index'),
 	path('login', views.authenticateUser.as_view()),
 	path('', views.userInformation.as_view()),# --> this handles all the get post put and delete request
@@ -14,4 +14,3 @@ urlpatterns = [
 	path('delete/<str:ph_number>', views.deleteUser, name='delete_user'),
 
 ]
-
