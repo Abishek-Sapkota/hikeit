@@ -178,3 +178,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# OTP SERVICE USING TWILIO
+TWILIO_ACCOUNT_SID = 'AC68fc1b87d257fddffd400195a0d11b85'
+TWILIO_AUTH_TOKEN = '79630c61095ead0954a2102bea969050'
+TWILIO_FROM_NUMBER = '+15674122236'

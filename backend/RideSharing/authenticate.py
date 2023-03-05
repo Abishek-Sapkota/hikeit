@@ -1,17 +1,105 @@
-from .models import UserInfo
-from .serializer import UserInfoSerializer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view 
+
+from django.conf import settings
+from twilio.rest import Client
+from random import randint
 
 
-def authenticateUser(ph_number):
+from .serializer import UserInfoSerializer, loginSerializer
+from .models import UserInfo, otp
+
+
+
+class authenticateUser(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            serializer = loginSerializer(data=data)
+            if serializer.is_valid():
+                phoneNumber = serializer.validated_data['phoneNumber']
+                try:
+                    user = UserInfo.objects.get(phoneNumber=phoneNumber)
+                except UserInfo.DoesNotExist:
+                    return Response({
+                        "status": 404,
+                        "message": "Phone number not found",
+                        "paylaod": {},
+                    })
+                serializer = UserInfoSerializer(user)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'payload': serializer.data
+                })
+        except Exception as e:
+            print(e)
+            return Response({
+                "message": "Internal server error",
+                "payload": {}
+            }, status=500)
+
+
+
+class sendOTP(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            phoneNumber = data['phoneNumber']
+            otp_value = randint(100000, 999999)
+
+            new_otp = otp.objects.create(
+                #user=user_info,
+                phoneNumber = phoneNumber,
+                otp = otp_value
+            )
+
+            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
+            message = client.messages.create(
+                body = "Your OTP for ride sharing app is "+ str(otp_value),
+                from_ = settings.TWILIO_FROM_NUMBER,
+                to = phoneNumber
+            )
+            return Response({
+                "message" :" OTP sent",
+                "payload" :{}
+            },status=200)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                "message": "Something went wrong",
+                "payload": {},
+            })
+
+
+@api_view(['POST'])
+def verifyOTP(request):
     try:
-        print("test5")
-        user = UserInfo.objects.get(ph_number= ph_number)
-        print("test6")
-        return user
+        data = request.data
+        phoneNumber = data['phoneNumber']
+        otp_value = data['otp']
 
-    except:
-        return None
+        user = otp.objects.filter(phoneNumber=phoneNumber, otp=otp_value).last()
+        return Response({
+            "message" : "OTP verified",
+            "paylaod" : {}
+            
+        },status=200)
 
+        if user is None:
+            return Response({
+                "message": "OTP didnot matched",
+                "payload": {}
+            },status=404)
 
-
-
+    except Exception as e:
+        print(e)
+        return Response({
+            "message": "Something went wrong",
+            "payload" : {},
+        }, status=400)

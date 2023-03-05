@@ -3,16 +3,15 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializer import UserInfoSerializer, loginSerializer, rideInfoSerializer
 from .models import UserInfo, rideInfo, vehicleInformation
-from .authenticate import authenticateUser
+
 
 
 # @api_view(["GET", "POST"])
 # def index(request):
-#     routes = [{"first_name": "Ramey", "last_name": "Kuikel", "ph_number": "9847563258"}]
+#     routes = [{"first_name": "Ramey", "last_name": "Kuikel", "phoneNumberprin": "9847563258"}]
 
 #     return Response(routes)
 
@@ -52,20 +51,11 @@ class userInformation(APIView):  # --> classbased api view
             print(e)
 
 
-# @api_view(['GET'])
-# def getUserInfo(request):
-# 	userinfo = UserInfo.objects.all()
-# 	serializer = UserInfoSerializer(userinfo, many=True) #-> serializes the userinfo for frontend
-# 	return Response(serializer.data)
-
-
 @api_view(["GET"])
-def getOneUserInfo(request, ph_number):
+def getOneUserInfo(request, phoneNumber):
     try:
-        userinfo = UserInfo.objects.get(ph_number=ph_number)
-        print(userinfo)
+        userinfo = UserInfo.objects.get(phoneNumber=phoneNumber)
         serializer = UserInfoSerializer(userinfo, many=False)
-        print(serializer.data)
         return Response(
             {
                 "status": 200,
@@ -73,10 +63,10 @@ def getOneUserInfo(request, ph_number):
                 "message": "User information obtained sucessfully",
             }
         )
-    except:
+    except UserInfo.DoesNotExist:
         return Response(
             {
-                "status": 400,
+                "status": 404,
                 "payload": {},
                 "message": "User doesnot exist",
             }
@@ -90,20 +80,21 @@ def createUser(request):
     new_user = UserInfo.objects.create(
         first_name=data['firstName'],
         last_name=data['lastName'],
-        ph_number=data['phone'],
+        phoneNumber=data['phone'],
         isRider=data['isRider'],
         current_address=data['currentAddress'],
-        DOB = data['dateOfBirth']
+        dob = data['dateOfBirth'].split('T')[0],
     )
+
     serializer = UserInfoSerializer(new_user, many=False)
     return Response(serializer.data)
 
 
 @api_view(["PUT"])  # Put request is to update data
-def updateUser(self, request, ph_number):  # ---> update the user information
+def updateUser(self, request, phoneNumber):  # ---> update the user information
     data = request.data
     try:
-        user = UserInfo.objects.get(ph_number=ph_number)
+        user = UserInfo.objects.get(phoneNumber=phoneNumber)
         for key, value in data.items():
             setattr(user, key, value)
             user.save()
@@ -117,23 +108,30 @@ def updateUser(self, request, ph_number):  # ---> update the user information
                 "payload": {},
             }
         )
-    except:
+    except UserInfo.DoesNotExist:
         return Response(
             {
-                "status": 403,
-                "error": "User id not found",
-                "message": "task unsuccessful",
+                "status": 404,
+                "message": "User phone number not found",
                 "payload": {},
             }
         )
 
 
 @api_view(["DELETE"])
-def deleteUser(request, ph_number):  # --> delete the existing user
-    user = UserInfo.objects.get(ph_number=ph_number)
-    user.delete()
-    return Response({"status": 200, "message": "User deleted sucessfully", "data": {}})
+def deleteUser(request, phoneNumber):  # --> delete the existing user
+    try:
+        user = UserInfo.objects.get(phoneNumber=phoneNumber)
+        user.delete()
+        return Response({"status": 200, "message": "User deleted sucessfully", "data": {}})
 
+    except UserInfo.DoesNotExist:
+        return Response({
+            "status": 404,
+            "message": "User phone number not found",
+            "payload": {},
+
+        })
 
 
 
@@ -172,7 +170,7 @@ def getLoci(request, pk):
         serializer = rideInfoSerializer(user_id=pk)
         print(serializer)
         if serializer.is_valid():
-            ph_number = serializer.data["ph_number"]
+            phoneNumber = serializer.data["phoneNumber"]
             return Response(
                 {
                     "status": 200,
@@ -194,44 +192,3 @@ def getLoci(request, pk):
                 "message": "something went wrong",
             }
         )
-
-
-class authenticateUser(APIView):
-    def post(self, request):
-        try:
-            data = request.data 
-            print("test1")
-            serializer = loginSerializer(data = data)
-            if serializer.is_valid():
-                ph_number = serializer.data['ph_number']
-
-                # try:
-                user = UserInfo.objects.get(ph_number=ph_number)
-                #user = UserInfo.objects.filter(ph_number=ph_number)
-                
-                serializer = UserInfoSerializer(user, many=False)
-                # refresh = RefreshToken.for_user(user)
-                #print(str(refresh))
-                #print(str(refresh.access_token))
-                # return {
-                #     'refresh': str(refresh),
-                #     'access': str(refresh.access_token),
-                #     }
-                    
-                
-            
-                # except:
-                #     return Response({
-                #         "status":400,
-                #         "message":"Wrong phone number",
-                #         "error": serializer.errors
-                #     })
-                
-                return Response(
-                    {
-                        "status":200,
-                        "payload":serializer.data,
-                     }
-                )
-        except Exception as e:
-            print(e)

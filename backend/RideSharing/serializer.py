@@ -9,7 +9,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 
 class loginSerializer(serializers.Serializer):
-	ph_number = serializers.CharField()
+	phoneNumber = serializers.CharField()
 
 
 class rideInfoSerializer(serializers.ModelSerializer):
@@ -28,5 +28,3 @@ class vehicleInformationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = vehicleInformation
 		fields = '__all__'
-
-
