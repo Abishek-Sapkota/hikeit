@@ -8,7 +8,6 @@ class UserInfo(models.Model):
 	#id= models.AutoField(primary_key=True)
 	first_name = models.CharField(max_length=15)
 	last_name = models.CharField(max_length=20)
-	#email = models.EmailField(unique=True, blank = True)
 	phoneNumber = models.CharField(max_length=14, unique=True)
 	current_address = models.CharField(max_length=50)
 	dob = models.CharField(max_length=10)
@@ -23,7 +22,6 @@ class UserInfo(models.Model):
 
 
 class otp(models.Model):
-	#user = models.ForeignKey(UserInfo, on_delete=models.CASCADE,)
 	phoneNumber = models.CharField(max_length=14)
 	otp = models.CharField(max_length=6)
 

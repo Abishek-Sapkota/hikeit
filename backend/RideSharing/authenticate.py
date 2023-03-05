@@ -52,7 +52,6 @@ class sendOTP(APIView):
             otp_value = randint(100000, 999999)
 
             new_otp = otp.objects.create(
-                #user=user_info,
                 phoneNumber = phoneNumber,
                 otp = otp_value
             )
