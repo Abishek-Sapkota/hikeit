@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,20 +8,13 @@ from .models import UserInfo, rideInfo, vehicleInformation
 
 
 
-# @api_view(["GET", "POST"])
-# def index(request):
-#     routes = [{"first_name": "Ramey", "last_name": "Kuikel", "phoneNumberprin": "9847563258"}]
-
-#     return Response(routes)
-
-
 class userInformation(APIView):  # --> classbased api view
     def get(self, request):  # --> this just list all the users
         userinfo = UserInfo.objects.all()
         serializer = UserInfoSerializer(
             userinfo, many=True
         )  # -> serializes the userinfo for frontend
-        print(serializer.data)
+        
         return Response(
             {
                 "status": 200,
@@ -34,9 +26,8 @@ class userInformation(APIView):  # --> classbased api view
     def post(self, request):  # --> create new user
         try:
             data = request.data  # -> extract the data part from the post request
-            print(data)
             serializer = UserInfoSerializer(data=data, many=False)
-            print(serializer)
+            
             if serializer.is_valid():
                 serializer.save()
                 return Response(
@@ -54,8 +45,10 @@ class userInformation(APIView):  # --> classbased api view
 @api_view(["GET"])
 def getOneUserInfo(request, phoneNumber):
     try:
-        userinfo = UserInfo.objects.get(phoneNumber=phoneNumber)
-        serializer = UserInfoSerializer(userinfo, many=False)
+        user = UserInfo.objects.get(phoneNumber=phoneNumber)
+        request.session['user_id'] = user.id
+        request.session['phoneNumber'] = user.phoneNumber  
+        serializer = UserInfoSerializer(user, many=False)
         return Response(
             {
                 "status": 200,
@@ -192,3 +185,15 @@ def getLoci(request, pk):
                 "message": "something went wrong",
             }
         )
+
+
+@api_view(['GET'])
+def getPhotoUrl(request):
+    data = request.data
+    #do something to get user data in user
+    user = None
+    #to get image url do the following
+    url = user.user_profile.url
+    return Response({
+        "source": url
+    })

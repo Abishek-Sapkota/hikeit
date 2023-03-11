@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +28,7 @@ SECRET_KEY = 'django-insecure-x8dd@9y0ezrm^(25sxu#h^ccstsb6@=ikt+hw&(#mmp(^myc23
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     'RideSharing',
     'rest_framework',
     'rest_framework_simplejwt',
+    'cloudinary',
 
 ]
 
@@ -173,6 +176,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILE_DIR = [
+    os.path.join(BASE_DIR, 'static')
+
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -183,3 +191,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TWILIO_ACCOUNT_SID = 'AC68fc1b87d257fddffd400195a0d11b85'
 TWILIO_AUTH_TOKEN = 'df4199186535a8f338b9eff9578776f6'
 TWILIO_FROM_NUMBER = '+15674122236'
+
+cloudinary.config(
+    cloud_name = 'dgeunftfh',
+    api_key = '569147488469659',
+    api_secret ='ilVvEWDflB8FUs99K1FCHEsh1Q4' 
+)

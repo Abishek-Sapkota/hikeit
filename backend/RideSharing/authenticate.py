@@ -28,7 +28,7 @@ class authenticateUser(APIView):
                         "message": "Phone number not found",
                         "paylaod": {},
                     })
-                serializer = UserInfoSerializer(user)
+                serializer = UserInfoSerializer(user) 
                 refresh = RefreshToken.for_user(user)
                 return Response({
                     'refresh': str(refresh),
@@ -65,7 +65,8 @@ class sendOTP(APIView):
             )
             return Response({
                 "message" :" OTP sent",
-                "payload" :{}
+                "payload" :{},
+                "response": "true",
             },status=200)
 
         except Exception as e:
@@ -73,6 +74,7 @@ class sendOTP(APIView):
             return Response({
                 "message": "Something went wrong",
                 "payload": {},
+                "response": "fasle",
             })
 
 
@@ -84,18 +86,19 @@ def verifyOTP(request):
         otp_value = data['otp']
 
         user = otp.objects.filter(phoneNumber=phoneNumber, otp=otp_value).last()
-        return Response({
-            "message" : "OTP verified",
-            "paylaod" : {}
-            
-        },status=200)
-
         if user is None:
             return Response({
                 "message": "OTP didnot matched",
-                "payload": {}
+                "payload": {},
+                "response": "false"
             },status=404)
 
+        return Response({
+            "message" : "OTP verified",
+            "paylaod" : {},
+            "response" :"true",   
+        },status=200)
+        
     except Exception as e:
         print(e)
         return Response({

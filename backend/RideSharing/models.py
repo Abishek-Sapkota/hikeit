@@ -1,4 +1,5 @@
 from django.db import models
+from cloudinary.models import CloudinaryField
 #from phonenumber_field.modelfields import PhoneNumberField
 
 # Create your models here.
@@ -11,7 +12,7 @@ class UserInfo(models.Model):
 	phoneNumber = models.CharField(max_length=14, unique=True)
 	current_address = models.CharField(max_length=50)
 	dob = models.CharField(max_length=10)
-	user_profile = models.ImageField(upload_to="profilesPictures", blank=True)
+	user_profile = CloudinaryField()
 	isRider = models.BooleanField(default=False, blank=True)
 	created_at = models.DateTimeField(auto_now=True)
 
@@ -24,9 +25,6 @@ class UserInfo(models.Model):
 class otp(models.Model):
 	phoneNumber = models.CharField(max_length=14)
 	otp = models.CharField(max_length=6)
-
-
-
 
 
 class rideInfo(models.Model):
@@ -42,12 +40,12 @@ class rideInfo(models.Model):
 	status = models.CharField(default=OPEN, max_length=2, choices=STATUS)
 	user_id = models.ForeignKey(UserInfo, on_delete=models.CASCADE)
 	destination = models.JSONField(default=dict)
-	destinationName = models.CharField(max_length=70)
-	destinationPlaceId = models.CharField(max_length=50)
+	destinationName = models.CharField(max_length=70, blank=True)
+	destinationPlaceId = models.CharField(max_length=50, blank=True)
 	origin = models.JSONField(default=dict)
-	originName = models.CharField(max_length=70)
-	originPlaceId = models.CharField(max_length=50)
-	vehicletype = models.CharField(max_length=10)
+	originName = models.CharField(max_length=70, blank=True)
+	originPlaceId = models.CharField(max_length=50, blank=True)
+	vehicletype = models.CharField(max_length=10, blank=True)
 	timestamp = models.DateTimeField(auto_now=True)
 
 
@@ -84,3 +82,6 @@ class vehicleInformation(models.Model):
 	license_photo = models.ImageField(upload_to="LicensePictures")
 
 	timestamp = models.DateTimeField(auto_now=True)
+
+class test1(models.Model):
+	image = CloudinaryField('image')
